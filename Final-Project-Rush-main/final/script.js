@@ -31,14 +31,25 @@ let scene3 = {
 
 
 
+const GAME_SCALE = 6;
+const GAME_WIDTH = 272 * GAME_SCALE;
+const GAME_HEIGHT = 160 * GAME_SCALE;
+const PLAYER_SCALE = 2.5;
+const PLAYER_HEIGHT = 32 * PLAYER_SCALE;
+const SKELETON_SCALE = PLAYER_SCALE / 2;
+const SKELETON_HEIGHT = 64 * SKELETON_SCALE;
+const SKELETON_IDLE_FRAME = 7;
+
 const config = {
      type: Phaser.AUTO,
+     parent: "game-container",
      scale: {
-          width: 1150,
-          height: 650,
+          width: GAME_WIDTH,
+          height: GAME_HEIGHT,
           mode: Phaser.Scale.FIT,
           autoCenter: Phaser.Scale.CENTER_BOTH
      },
+     pixelArt: true,
      physics: {
           default: "arcade",
           arcade: {
@@ -68,9 +79,9 @@ function createForestBackground(scene) {
      ];
 
      keys.forEach((key) => {
-          scene.add.image(575, 325, key)
+          scene.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, key)
                .setOrigin(0.5)
-               .setDisplaySize(1150, 650)
+               .setDisplaySize(GAME_WIDTH, GAME_HEIGHT)
                .setDepth(-10);
      });
 }
@@ -87,13 +98,13 @@ function scene1preload() {
 function scene1create() {
     this.cameras.main.setBackgroundColor("#000000");
 
-    this.add.text(550, 390, 'press arrow keys to jump and move, shift to dash', {
-        font: '24px Arial',
+    this.add.text(GAME_WIDTH / 2, 88 * GAME_SCALE, 'press arrow keys to jump and move, shift to dash', {
+        font: `${10 * GAME_SCALE}px Arial`,
         fill: '#ffffff'
     }).setOrigin(0.5)
 
-    this.add.text(550, 450, 'press any key to start', {
-        font: '40px Arial',
+    this.add.text(GAME_WIDTH / 2, 116 * GAME_SCALE, 'press any key to start', {
+        font: `${14 * GAME_SCALE}px Arial`,
         fill: '#ffffff'
         
     }).setOrigin(0.5)
@@ -118,9 +129,14 @@ function scene2preload() {
      this.load.image("forest-lights", "assets/parallax-forest/parallax-forest-lights.png");
      this.load.image("forest-middle", "assets/parallax-forest/parallax-forest-middle-trees.png");
      this.load.image("forest-front", "assets/parallax-forest/parallax-forest-front-trees.png");
-     this.load.spritesheet("fumiko", "assets/parallax-forest/fumiko.png", {
-          frameWidth: 24,
-          frameHeight: 32
+     this.load.spritesheet("fumiko", "assets/parallax-forest/fumiko.png",
+           {
+                frameWidth: 24,
+                frameHeight: 32
+           });
+     this.load.spritesheet("skeleton-Evil", "assets/skeleton-1.4/PNG/48x64_scale/skeleton-red_eyes-NESW.png", {
+          frameWidth: 48,
+          frameHeight: 64
      });
 }
 
@@ -128,12 +144,16 @@ function scene2preload() {
 function scene2create() {
     createForestBackground(this);
     
-    player = this.physics.add.sprite(1150 / 2, 650 / 2, "fumiko", 20);
+    player = this.physics.add.sprite(GAME_WIDTH / 4, GAME_HEIGHT - PLAYER_HEIGHT / 2, "fumiko", 20);
+    player.setScale(PLAYER_SCALE);
     player.body.setSize(20, 32);
 
     player.body.setCollideWorldBounds(true);
 
-    this.physics.world.gravity.y = 1000;
+    this.add.sprite(GAME_WIDTH * 3 / 4, GAME_HEIGHT - SKELETON_HEIGHT / 2, "skeleton-Evil", SKELETON_IDLE_FRAME)
+        .setScale(SKELETON_SCALE);
+
+    this.physics.world.gravity.y = 250 * GAME_SCALE;
 
     cursors = this.input.keyboard.createCursorKeys();
 
@@ -148,12 +168,12 @@ function scene2update(time, delta) {
 
     if (cursors.left.isDown) {
         facing = -1;
-        player.body.setVelocityX(-250)
+        player.body.setVelocityX(-62.5 * GAME_SCALE)
         player.flipX=true;
 
     } else if (cursors.right.isDown) {
         facing = 1;
-        player.body.setVelocityX(250);
+        player.body.setVelocityX(62.5 * GAME_SCALE);
         player.flipX=false;
     }
 
@@ -169,13 +189,13 @@ function scene2update(time, delta) {
 
 
     if (dashTime > 0) {
-        player.body.setVelocityX(facing * 700);
+        player.body.setVelocityX(facing * 175 * GAME_SCALE);
         dashTime = Math.max(0, dashTime - delta);
     }
 
 
     if (Phaser.Input.Keyboard.JustDown(cursors.up) && jumpsUsed < 2) {
-        player.body.setVelocityY(-550);
+        player.body.setVelocityY(-137.5 * GAME_SCALE);
         jumpsUsed++;
     }
 
